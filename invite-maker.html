@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Invitation maker · Lushomo &amp; Edna</title>
+<meta name="theme-color" content="#0f1d4d">
+<link rel="icon" href="assets/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gloock&family=Figtree:wght@400;500;600&family=Pinyon+Script&display=swap">
+<style>
+:root{--bg:#fbfaf7;--surface:#fff;--fg:#141a33;--muted:#5a6078;--line:#e2e0d8;--blue:#1e3a9c;--navy:#0f1d4d;--gold:#b48a32;--soft:#f3efe2;--ok:#2e7d4f;
+  --display:"Gloock",Georgia,serif;--body:"Figtree",system-ui,sans-serif}
+@media (prefers-color-scheme:dark){:root{--bg:#0a1029;--surface:#121a3b;--fg:#eef0f7;--muted:#a6acc4;--line:#26305a;--blue:#9fb3ff;--gold:#e3c77d;--soft:#1a2247;--ok:#6fcf97;color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.6 var(--body)}
+header{background:var(--navy);color:#f6f3ea;text-align:center;padding:26px 16px}
+header h1{margin:0;font:400 clamp(1.6rem,6vw,2.1rem)/1.15 var(--display)}
+header p{margin:6px 0 0;color:#e3c77d;font-size:.9rem}
+main{max-width:640px;margin:0 auto;padding:24px 16px 60px;display:grid;gap:22px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:18px;display:grid;gap:14px}
+h2{margin:0;font:400 1.3rem/1.2 var(--display);color:var(--blue)}
+label{display:grid;gap:4px;font-weight:600;font-size:.92rem}
+label small{font-weight:400;color:var(--muted)}
+input,select,textarea{font:inherit;padding:11px 12px;border:1px solid var(--line);border-radius:4px;background:var(--bg);color:var(--fg);width:100%}
+textarea{min-height:130px;resize:vertical}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:520px){.two{grid-template-columns:1fr}}
+.btn{display:inline-flex;align-items:center;justify-content:center;border:0;cursor:pointer;font:600 .92rem var(--body);padding:11px 16px;border-radius:4px;text-decoration:none;background:var(--blue);color:var(--bg)}
+.btn.gd{background:var(--gold);color:#fff}
+.btn.alt{background:transparent;color:var(--blue);border:1.5px solid var(--blue)}
+.btn.sm{padding:7px 11px;font-size:.84rem}
+.btn:disabled{opacity:.5;cursor:default}
+.btn:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,summary:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.note{color:var(--muted);font-size:.88rem}
+ul{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+li{border:1px solid var(--line);border-radius:6px;padding:12px;display:grid;gap:8px;background:var(--bg)}
+li b{font-weight:600}
+li .meta{color:var(--muted);font-size:.85rem}
+.err{color:#b3261e;font-size:.9rem}
+.ok{color:var(--ok);font-size:.9rem}
+details summary{cursor:pointer;font-weight:600;color:var(--blue)}
+details>div{display:grid;gap:12px;margin-top:12px}
+</style>
+</head>
+<body>
+<header><h1>Invitation maker</h1><p>Personal invitations from Pastor O. Mwiinde and Mr. E. Mumba</p></header>
+<main>
+  <form class="panel" id="f" novalidate>
+    <h2>Add an invited guest</h2>
+    <label for="name">Guest name(s)<small>As it should read on the card, e.g. Mr &amp; Mrs Banda, Dr. Phiri, Aunt Grace</small>
+      <input id="name" required autocomplete="off"></label>
+    <div class="two">
+      <label for="phone">WhatsApp number<small>Optional, e.g. 0977 123 456</small>
+        <input id="phone" type="tel" inputmode="tel" autocomplete="off"></label>
+      <label for="side">Invited by
+        <select id="side"><option value="">Both families</option><option value="Pastor O. Mwiinde">Pastor O. Mwiinde (groom)</option><option value="Mr. E. Mumba">Mr. E. Mumba (bride)</option></select></label>
+    </div>
+    <div class="row"><button class="btn" type="submit">Add guest</button><span class="err" id="err" role="alert"></span></div>
+  </form>
+
+  <form class="panel" id="bf" novalidate>
+    <h2>Add many guests at once</h2>
+    <label for="bulk">One guest per line<small>Name, WhatsApp number (optional), invited by (optional: groom or bride). You can paste straight from Excel or Google Sheets.</small>
+      <textarea id="bulk" placeholder="Mr &amp; Mrs Banda, 0977123456, groom&#10;Dr. Phiri, 0966555111, bride&#10;Aunt Grace"></textarea></label>
+    <div class="row">
+      <button class="btn" type="submit">Add all</button>
+      <label class="btn alt" style="cursor:pointer;font-weight:600">Upload CSV / text file<input id="file" type="file" accept=".csv,.txt,text/csv,text/plain" hidden></label>
+      <span class="err" id="berr" role="alert"></span><span class="ok" id="bok" role="status"></span>
+    </div>
+  </form>
+
+  <section class="panel">
+    <h2>Guest invitations <span class="note" id="count"></span></h2>
+    <div class="row" id="bulkbar" hidden>
+      <button class="btn gd sm" type="button" id="allPdf">All cards as one PDF</button>
+      <button class="btn gd sm" type="button" id="allPng">All cards as pictures (.zip)</button>
+      <span class="note" id="prog" role="status"></span>
+    </div>
+    <ul id="list"></ul>
+    <p class="note" id="empty">No guests added yet.</p>
+    <div class="row" id="tools" hidden>
+      <button class="btn alt sm" type="button" id="csv">Download list (CSV)</button>
+      <button class="btn alt sm" type="button" id="clear">Clear all</button>
+    </div>
+    <p class="note">Guests are saved only in this browser on this device. Nothing is uploaded. Download the list to keep a copy or move it to another device.</p>
+  </section>
+</main>
+<script>
+const SITE=new URL("./",location.href).href;
+const BASE=new URL("invite.html",location.href).href;
+const $=id=>document.getElementById(id);
+const KEY="le-invited-guests";
+let guests=[];
+try{guests=JSON.parse(localStorage.getItem(KEY)||"[]")}catch{}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(guests))}catch{}};
+const slug=s=>s.trim().toLowerCase().replace(/&/g," and ").replace(/[^\p{L}\p{N}\s-]/gu,"").replace(/\s+/g,"-").replace(/-+/g,"-").replace(/^-|-$/g,"");
+function intl(p){let d=String(p).replace(/\D/g,"");if(!d)return "";if(d.startsWith("00"))d=d.slice(2);else if(d.startsWith("0"))d="260"+d.slice(1);return d}
+const linkFor=g=>BASE+"#for-"+encodeURIComponent(slug(g.name));
+function wa(g){
+  const who=g.side.startsWith("Pastor")?"Pastor O. Mwiinde is inviting you to the wedding of his son Lushomo and Edna":
+    g.side.startsWith("Mr.")?"Mr. E. Mumba is inviting you to the wedding of his daughter Edna and Lushomo":
+    "Pastor O. Mwiinde and Mr. E. Mumba are inviting you to the wedding of their son Lushomo and daughter Edna";
+  const t=`Dear ${g.name},\n\n${who} on 27 December 2026 in Lusaka.\n\nYour invitation: ${linkFor(g)}`;
+  return "https://wa.me/"+(g.phone?g.phone:"")+"?text="+encodeURIComponent(t)}
+async function copy(text,btn){try{await navigator.clipboard.writeText(text);const o=btn.textContent;btn.textContent="Copied";setTimeout(()=>btn.textContent=o,1500)}catch{prompt("Copy this link:",text)}}
+
+/* ---------- Card drawing (canvas) ---------- */
+const CW=1080,CH=1960,GOLD="#e3c77d",GOLD_D="#b48a32",INK="#f6f3ea";
+let photo=null,fontsReady=null;
+function ready(){
+  if(!fontsReady)fontsReady=Promise.all([
+    document.fonts.load('54px "Gloock"'),document.fonts.load('60px "Pinyon Script"'),document.fonts.load('32px "Figtree"'),document.fonts.load('600 32px "Figtree"'),
+    new Promise((res,rej)=>{photo=new Image();photo.onload=res;photo.onerror=()=>rej(new Error("Photo failed to load"));photo.src="assets/couple.jpg"})
+  ]).catch(e=>{fontsReady=null;throw e});
+  return fontsReady}
+function fit(ctx,text,font,px,maxW){let s=px;do{ctx.font=font.replace("{}",s+"px");if(ctx.measureText(text).width<=maxW||s<=24)break;s-=2}while(true);return s}
+function diamonds(ctx,y){ctx.fillStyle=GOLD;ctx.globalAlpha=.6;for(let x=96;x<=CW-96;x+=34){ctx.beginPath();ctx.moveTo(x,y-9);ctx.lineTo(x+9,y);ctx.lineTo(x,y+9);ctx.lineTo(x-9,y);ctx.closePath();ctx.fill()}ctx.globalAlpha=1}
+function rule(ctx,y){ctx.strokeStyle=GOLD;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(CW/2-90,y);ctx.lineTo(CW/2+90,y);ctx.stroke();
+  ctx.fillStyle=GOLD;ctx.beginPath();ctx.moveTo(CW/2,y-12);ctx.lineTo(CW/2+12,y);ctx.lineTo(CW/2,y+12);ctx.lineTo(CW/2-12,y);ctx.closePath();ctx.fill()}
+function tx(ctx,t,y,font,color,spacing){ctx.font=font;ctx.fillStyle=color;if("letterSpacing" in ctx)ctx.letterSpacing=spacing||"0px";
+  ctx.fillText(spacing&&!("letterSpacing" in ctx)?t.split("").join(" "):t,CW/2+(spacing?parseFloat(spacing)/2:0),y);if("letterSpacing" in ctx)ctx.letterSpacing="0px"}
+async function drawCard(g){
+  await ready();
+  const c=document.createElement("canvas");c.width=CW;c.height=CH;const ctx=c.getContext("2d");ctx.textAlign="center";ctx.textBaseline="alphabetic";
+  let bg=ctx.createLinearGradient(0,0,0,CH);bg.addColorStop(0,"#14246b");bg.addColorStop(.45,"#0f1d4d");bg.addColorStop(1,"#0a1438");ctx.fillStyle=bg;ctx.fillRect(0,0,CW,CH);
+  ctx.strokeStyle=GOLD;ctx.lineWidth=4;ctx.strokeRect(34,34,CW-68,CH-68);
+  ctx.globalAlpha=.4;ctx.lineWidth=2;ctx.strokeRect(54,54,CW-108,CH-108);ctx.globalAlpha=1;
+  diamonds(ctx,96);diamonds(ctx,CH-96);
+  if(g&&g.name){const s=fit(ctx,"Dear "+g.name+",",'{} "Pinyon Script"',76,840);tx(ctx,"Dear "+g.name+",",200,s+'px "Pinyon Script"',GOLD)}
+  tx(ctx,"WITH JOY",g&&g.name?276:226,'600 24px "Figtree"',GOLD,"7px");
+  tx(ctx,"Pastor O. Mwiinde",362,'56px "Gloock"',GOLD);
+  tx(ctx,"and",424,'60px "Pinyon Script"',INK);
+  tx(ctx,"Mr. E. Mumba",494,'56px "Gloock"',GOLD);
+  tx(ctx,"are inviting you to the wedding of",570,'32px "Figtree"',INK);
+  tx(ctx,"their son and daughter",614,'32px "Figtree"',INK);
+  rule(ctx,672);
+  // photo arch
+  const w=420,h=540,x0=CW/2-w/2,top=724,r=w/2;
+  const arch=(inset)=>{ctx.beginPath();ctx.moveTo(x0+inset,top+h-inset);ctx.lineTo(x0+inset,top+r);ctx.arc(CW/2,top+r,r-inset,Math.PI,0);ctx.lineTo(x0+w-inset,top+h-inset);ctx.closePath()};
+  arch(0);ctx.strokeStyle=GOLD;ctx.lineWidth=4;ctx.stroke();
+  ctx.save();arch(12);ctx.clip();
+  const iw=photo.naturalWidth,ih=photo.naturalHeight,sw=ih*((w-24)/(h-24)),sx=Math.max(0,(iw-sw)*.42);
+  ctx.drawImage(photo,sx,0,Math.min(sw,iw),ih,x0+12,top+12,w-24,h-24);ctx.restore();
+  tx(ctx,"Lushomo",1380,'120px "Gloock"',INK);
+  tx(ctx,"and",1450,'76px "Pinyon Script"',GOLD);
+  tx(ctx,"Edna",1560,'120px "Gloock"',INK);
+  tx(ctx,"Sunday, 27 December 2026",1650,'46px "Gloock"',INK,"2px");
+  tx(ctx,"LUSAKA · ZAMBIA",1696,'600 24px "Figtree"',GOLD,"7px");
+  rule(ctx,1740);
+  ctx.globalAlpha=.85;
+  tx(ctx,"Venue and programme times will be shared soon.",1788,'28px "Figtree"',INK);
+  tx(ctx,"Kindly reply by 10 December 2026.",1826,'28px "Figtree"',INK);ctx.globalAlpha=1;
+  return c}
+const blobOf=(c,type,q)=>new Promise(res=>c.toBlob(res,type,q));
+function download(blob,name){const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000)}
+const fname=(g,ext)=>"invitation-"+(slug(g.name)||"guest")+"."+ext;
+
+/* ---------- PDF writer (one JPEG per page) ---------- */
+const enc=new TextEncoder();
+async function makePdf(canvases){
+  const PW=405,PH=Math.round(405*CH/CW*100)/100,parts=[],offs=[];let len=0;
+  const push=d=>{const u=typeof d==="string"?enc.encode(d):d;parts.push(u);len+=u.length};
+  const obj=(n,body)=>{offs[n]=len;push(n+" 0 obj\n");push(body);push("\nendobj\n")};
+  push("%PDF-1.4\n%\xE2\xE3\xCF\xD3\n");
+  const n=canvases.length,kids=canvases.map((_,i)=>(3+i*3)+" 0 R").join(" ");
+  obj(1,"<< /Type /Catalog /Pages 2 0 R >>");
+  obj(2,`<< /Type /Pages /Kids [${kids}] /Count ${n} >>`);
+  for(let i=0;i<n;i++){
+    const p=3+i*3,im=p+1,ct=p+2;
+    obj(p,`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${PW} ${PH}] /Resources << /XObject << /Im${i} ${im} 0 R >> >> /Contents ${ct} 0 R >>`);
+    const jpg=new Uint8Array(await (await blobOf(canvases[i],"image/jpeg",.93)).arrayBuffer());
+    offs[im]=len;push(`${im} 0 obj\n<< /Type /XObject /Subtype /Image /Width ${CW} /Height ${CH} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${jpg.length} >>\nstream\n`);push(jpg);push("\nendstream\nendobj\n");
+    const cs=`q ${PW} 0 0 ${PH} 0 0 cm /Im${i} Do Q`;
+    obj(ct,`<< /Length ${cs.length} >>\nstream\n${cs}\nendstream`)}
+  const xref=len,total=2+n*3;
+  let x=`xref\n0 ${total+1}\n0000000000 65535 f \n`;for(let i=1;i<=total;i++)x+=String(offs[i]).padStart(10,"0")+" 00000 n \n";
+  push(x+`trailer\n<< /Size ${total+1} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF`);
+  return new Blob(parts,{type:"application/pdf"})}
+
+/* ---------- ZIP writer (stored, no compression) ---------- */
+const crcT=(()=>{const t=new Uint32Array(256);for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0}return t})();
+const crc32=u=>{let c=~0;for(let i=0;i<u.length;i++)c=crcT[(c^u[i])&255]^(c>>>8);return ~c>>>0};
+function makeZip(files){
+  const parts=[],cen=[];let off=0;const d=new Date(),time=(d.getHours()<<11)|(d.getMinutes()<<5)|(d.getSeconds()>>1),date=((d.getFullYear()-1980)<<9)|((d.getMonth()+1)<<5)|d.getDate();
+  const u16=n=>[n&255,n>>8&255],u32=n=>[n&255,n>>8&255,n>>16&255,n>>24&255];
+  for(const f of files){
+    const nm=enc.encode(f.name),crc=crc32(f.data),sz=f.data.length;
+    const lh=new Uint8Array([0x50,0x4b,3,4,...u16(20),...u16(0x800),...u16(0),...u16(time),...u16(date),...u32(crc),...u32(sz),...u32(sz),...u16(nm.length),...u16(0)]);
+    parts.push(lh,nm,f.data);
+    cen.push(new Uint8Array([0x50,0x4b,1,2,...u16(20),...u16(20),...u16(0x800),...u16(0),...u16(time),...u16(date),...u32(crc),...u32(sz),...u32(sz),...u16(nm.length),...u16(0),...u16(0),...u16(0),...u16(0),...u32(0),...u32(off)]),nm);
+    off+=lh.length+nm.length+sz}
+  let cl=0;for(const p of cen){parts.push(p);cl+=p.length}
+  parts.push(new Uint8Array([0x50,0x4b,5,6,0,0,0,0,...u16(files.length),...u16(files.length),...u32(cl),...u32(off),0,0]));
+  return new Blob(parts,{type:"application/zip"})}
+
+/* ---------- UI ---------- */
+let busy=false;
+function setBusy(b,msg){busy=b;document.querySelectorAll("#list button,#allPdf,#allPng").forEach(x=>x.disabled=b);$("prog").textContent=msg||""}
+async function one(g,kind,btn){
+  if(busy)return;setBusy(true,"Making card…");
+  try{const c=await drawCard(g);
+    if(kind==="png")download(await blobOf(c,"image/png"),fname(g,"png"));
+    else download(await makePdf([c]),fname(g,"pdf"));
+    setBusy(false,"")}catch(e){setBusy(false,"Could not make the card: "+e.message)}}
+async function all(kind){
+  if(busy||!guests.length)return;setBusy(true,"Making cards…");
+  try{const cs=[],files=[],used={};
+    for(let i=0;i<guests.length;i++){$("prog").textContent=`Making card ${i+1} of ${guests.length}…`;
+      const c=await drawCard(guests[i]);
+      if(kind==="pdf")cs.push(c);
+      else{let nm=fname(guests[i],"png");if(used[nm]){nm=nm.replace(".png","-"+(i+1)+".png")}used[nm]=1;
+        files.push({name:nm,data:new Uint8Array(await(await blobOf(c,"image/png")).arrayBuffer())})}
+      await new Promise(r=>setTimeout(r))}
+    if(kind==="pdf")download(await makePdf(cs),"invitations.pdf");else download(makeZip(files),"invitations.zip");
+    setBusy(false,"Done.")}catch(e){setBusy(false,"Could not make the cards: "+e.message)}}
+function render(){
+  const ul=$("list");ul.textContent="";
+  guests.forEach((g,i)=>{
+    const li=document.createElement("li");
+    const b=document.createElement("b");b.textContent=g.name;
+    const m=document.createElement("span");m.className="meta";
+    m.textContent=[g.side||"Both families",g.phone?"+"+g.phone:""].filter(Boolean).join(" · ");
+    const r=document.createElement("div");r.className="row";
+    const mk=(txt,cls,fn)=>{const x=document.createElement("button");x.type="button";x.className="btn "+cls+" sm";x.textContent=txt;x.onclick=()=>fn(x);return x};
+    const w=document.createElement("a");w.className="btn gd sm";w.textContent="WhatsApp";w.href=wa(g);w.target="_blank";w.rel="noopener";
+    const v=document.createElement("a");v.className="btn alt sm";v.textContent="Preview";v.href=linkFor(g);v.target="_blank";v.rel="noopener";
+    r.append(w,mk("Picture","alt",()=>one(g,"png")),mk("PDF","alt",()=>one(g,"pdf")),mk("Copy link","alt",x=>copy(linkFor(g),x)),v,mk("Remove","alt",()=>{guests.splice(i,1);save();render()}));
+    li.append(b,m,r);ul.append(li)});
+  $("empty").hidden=guests.length>0;$("tools").hidden=$("bulkbar").hidden=guests.length===0;
+  $("count").textContent=guests.length?"("+guests.length+")":"";
+}
+$("f").addEventListener("submit",e=>{e.preventDefault();
+  const name=$("name").value.trim();
+  if(!slug(name)){$("err").textContent="Please enter the guest's name.";$("name").focus();return}
+  $("err").textContent="";
+  guests.push({name,phone:intl($("phone").value),side:$("side").value});
+  save();render();$("name").value="";$("phone").value="";$("name").focus()});
+function sideOf(s){s=(s||"").trim().toLowerCase();return /^(g|groom|pastor|mwiinde|son|lushomo)/.test(s)?"Pastor O. Mwiinde":/^(b|bride|mr|mumba|daughter|edna)/.test(s)?"Mr. E. Mumba":""}
+function addBulk(text){
+  const rows=text.split(/\r?\n/).map(l=>l.trim()).filter(Boolean);let n=0,skipped=0;
+  rows.forEach((l,i)=>{
+    const cells=(l.includes("\t")?l.split("\t"):l.split(/,(?=(?:[^"]*"[^"]*")*[^"]*$)/)).map(c=>c.trim().replace(/^"|"$/g,"").replace(/""/g,'"'));
+    if(i===0&&/^(guest\s*)?names?$/i.test(cells[0]))return;
+    if(!slug(cells[0]||"")){skipped++;return}
+    guests.push({name:cells[0],phone:intl(cells[1]||""),side:sideOf(cells[2])});n++});
+  return{n,skipped}}
+$("bf").addEventListener("submit",e=>{e.preventDefault();$("berr").textContent=$("bok").textContent="";
+  const {n,skipped}=addBulk($("bulk").value);
+  if(!n){$("berr").textContent="No guests found. Put one name per line.";return}
+  save();render();$("bulk").value="";$("bok").textContent=`Added ${n} guest${n>1?"s":""}${skipped?` (${skipped} skipped)`:""}.`});
+$("file").addEventListener("change",async e=>{const f=e.target.files[0];if(f)$("bulk").value=await f.text();e.target.value=""});
+$("clear").onclick=()=>{if(confirm("Remove all guests from this list?")){guests=[];save();render()}};
+$("allPdf").onclick=()=>all("pdf");$("allPng").onclick=()=>all("png");
+$("csv").onclick=()=>{const q=s=>'"'+String(s).replace(/"/g,'""')+'"';
+  const rows=[["Name","Phone","Invited by","Link"],...guests.map(g=>[g.name,g.phone,g.side||"Both families",linkFor(g)])];
+  download(new Blob(["﻿"+rows.map(r=>r.map(q).join(",")).join("\r\n")],{type:"text/csv"}),"invited-guests.csv")};
+render();
+</script>
+</body>
+</html>

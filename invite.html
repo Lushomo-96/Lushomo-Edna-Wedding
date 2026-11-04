@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>You're invited · Lushomo &amp; Edna</title>
+<meta name="description" content="Pastor O. Mwiinde and Mr. E. Mumba invite you to the wedding of their son Lushomo and daughter Edna, 27 December 2026, Lusaka.">
+<meta name="theme-color" content="#0f1d4d">
+<meta property="og:title" content="You're invited · Lushomo &amp; Edna">
+<meta property="og:description" content="Pastor O. Mwiinde and Mr. E. Mumba invite you to the wedding of their son and daughter, 27 December 2026.">
+<meta property="og:image" content="https://lushomo-96.github.io/Lushomo-Edna-Wedding/assets/couple.jpg">
+<meta property="og:type" content="website">
+<link rel="icon" href="assets/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gloock&family=Figtree:wght@400;500;600&family=Pinyon+Script&display=swap">
+<style>
+:root{--gold:#e3c77d;--gold-d:#b48a32;--navy:#0f1d4d;--ink:#f6f3ea;
+  --display:"Gloock",Georgia,serif;--body:"Figtree",system-ui,sans-serif;--script:"Pinyon Script","Brush Script MT",cursive}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:#070c22;color:var(--ink);font:16px/1.6 var(--body);display:grid;place-items:center;padding:20px 14px}
+.card{width:min(100%,430px);background:linear-gradient(180deg,#14246b 0%,#0f1d4d 45%,#0a1438 100%);border-radius:4px;padding:12px;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+.inner{position:relative;border:1.5px solid var(--gold);outline:1px solid rgba(227,199,125,.35);outline-offset:-7px;padding:44px 22px 36px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:0}
+.inner::before,.inner::after{content:"";position:absolute;left:0;right:0;height:10px;background:
+  linear-gradient(135deg,var(--gold) 25%,transparent 25%) 0 0/10px 10px,
+  linear-gradient(225deg,var(--gold) 25%,transparent 25%) 0 0/10px 10px;opacity:.55}
+.inner::before{top:-1px}.inner::after{bottom:-1px;transform:scaleY(-1)}
+.greet{font-family:var(--script);font-size:2.2rem;line-height:1.1;color:var(--gold);margin:0 0 14px}
+.kicker{font-size:.72rem;letter-spacing:.24em;text-transform:uppercase;color:var(--gold);margin:0 0 10px}
+.parents{margin:0;font-family:var(--display);font-size:1.3rem;line-height:1.35;color:var(--gold)}
+.parents .and{display:block;font-family:var(--script);font-size:1.7rem;color:var(--ink);line-height:1.1}
+.lead{margin:12px 0 0;font-size:.98rem;max-width:28ch;opacity:.92}
+.rule{width:64px;height:1px;background:var(--gold);margin:22px auto;position:relative}
+.rule::after{content:"";position:absolute;left:50%;top:-4px;width:8px;height:8px;background:var(--gold);transform:translateX(-50%) rotate(45deg)}
+.arch{width:min(58vw,220px);aspect-ratio:4/5;border-radius:999px 999px 8px 8px;border:2px solid var(--gold);padding:5px;margin:0 0 22px}
+.arch img{width:100%;height:100%;object-fit:cover;object-position:42% 30%;border-radius:999px 999px 5px 5px;display:block}
+.names{margin:0;font:400 clamp(2.6rem,13vw,3.6rem)/1.02 var(--display);display:flex;flex-direction:column;align-items:center}
+.names .amp{font-family:var(--script);color:var(--gold);font-size:.8em;line-height:.9}
+.date{margin:18px 0 0;font-family:var(--display);font-size:1.15rem;letter-spacing:.03em}
+.place{margin:2px 0 0;font-size:.74rem;letter-spacing:.24em;text-transform:uppercase;color:var(--gold)}
+.small{margin:0;font-size:.88rem;opacity:.8;max-width:32ch}
+.btn{display:inline-block;margin-top:22px;background:var(--gold-d);color:#fff;font:600 .95rem var(--body);padding:13px 26px;border-radius:3px;text-decoration:none}
+.btn:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+[hidden]{display:none!important}
+@media print{body{background:#fff;padding:0}.card{box-shadow:none;-webkit-print-color-adjust:exact;print-color-adjust:exact}.btn{display:none}}
+</style>
+</head>
+<body>
+<main class="card"><div class="inner">
+  <p class="greet" id="greet" hidden></p>
+  <p class="kicker">With joy</p>
+  <p class="parents">Pastor O. Mwiinde<span class="and">and</span>Mr. E. Mumba</p>
+  <p class="lead">are inviting you to the wedding of their son and daughter</p>
+  <div class="rule"></div>
+  <div class="arch"><img src="assets/couple.jpg" alt="Lushomo and Edna"></div>
+  <h1 class="names"><span>Lushomo</span><span class="amp">and</span><span>Edna</span></h1>
+  <p class="date">Sunday, 27 December 2026</p>
+  <p class="place">Lusaka · Zambia</p>
+  <div class="rule"></div>
+  <p class="small">Venue and programme times will be shared soon. Kindly reply by 10 December 2026.</p>
+  <a class="btn" id="go" href="index.html#rsvp">View details &amp; RSVP</a>
+</div></main>
+<script>
+// Personalise with a link like invite.html#for-mr-and-mrs-banda
+const h=decodeURIComponent(location.hash.slice(1));
+if(h.startsWith("for-")){
+  const n=h.slice(4).replace(/-/g," ").replace(/\b\w/g,c=>c.toUpperCase()).replace(/ And /g," & ");
+  const g=document.getElementById("greet");g.textContent="Dear "+n+",";g.hidden=false;
+  document.getElementById("go").href="index.html#"+h;
+}
+</script>
+</body>
+</html>

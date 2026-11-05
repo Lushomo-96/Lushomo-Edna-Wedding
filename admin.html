@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Invitation Desk · Lushomo &amp; Edna</title>
+<meta name="theme-color" content="#0f1d4d">
+<link rel="icon" href="assets/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gloock&family=Figtree:wght@400;500;600&family=Pinyon+Script&display=swap">
+<style>
+:root{--bg:#fbfaf7;--surface:#fff;--fg:#141a33;--muted:#5a6078;--line:#e2e0d8;--blue:#1e3a9c;--navy:#0f1d4d;--gold:#9a7424;--gold-fill:#b48a32;--soft:#f3efe2;--ok:#2e7d4f;--err:#b3261e;
+  --display:"Gloock",Georgia,serif;--body:"Figtree",system-ui,sans-serif}
+@media (prefers-color-scheme:dark){:root{--bg:#0a1029;--surface:#121a3b;--fg:#eef0f7;--muted:#a6acc4;--line:#26305a;--blue:#9fb3ff;--navy:#070c22;--gold:#e3c77d;--soft:#1a2247;--ok:#6fcf97;--err:#f2a49d;color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.6 var(--body)}
+.gut{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header{background:var(--navy);color:#f6f3ea;text-align:center;padding-block:26px;position:relative}
+header h1{margin:0;font:400 clamp(1.6rem,6vw,2.1rem)/1.15 var(--display)}
+header p{margin:6px 0 0;color:#e3c77d;font-size:.9rem}
+#out{position:absolute;right:max(12px,env(safe-area-inset-right,0px));top:12px;background:transparent;color:#e3c77d;border:1px solid #e3c77d;border-radius:4px;padding:5px 10px;font:600 .8rem var(--body);cursor:pointer}
+main{max-width:660px;margin:0 auto;padding-block:24px 60px;display:grid;gap:22px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:18px;display:grid;gap:14px;min-width:0}
+h2{margin:0;font:400 1.3rem/1.2 var(--display);color:var(--blue)}
+label{display:grid;gap:4px;font-weight:600;font-size:.92rem}
+label small{font-weight:400;color:var(--muted)}
+input,select,textarea{font:inherit;padding:11px 12px;border:1px solid var(--line);border-radius:4px;background:var(--bg);color:var(--fg);width:100%;min-width:0}
+textarea{min-height:130px;resize:vertical}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:520px){.two{grid-template-columns:1fr}}
+.btn{display:inline-flex;align-items:center;justify-content:center;border:0;cursor:pointer;font:600 .92rem var(--body);padding:11px 16px;border-radius:4px;text-decoration:none;background:var(--blue);color:var(--bg)}
+.btn.gd{background:var(--gold-fill);color:#fff}
+.btn.alt{background:transparent;color:var(--blue);border:1.5px solid var(--blue)}
+.btn.sm{padding:7px 11px;font-size:.84rem}
+.btn:disabled{opacity:.5;cursor:default}
+.btn:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.note{color:var(--muted);font-size:.88rem}
+ul{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+li{border:1px solid var(--line);border-radius:6px;padding:12px;display:grid;gap:8px;background:var(--bg);min-width:0}
+li b{font-weight:600;overflow-wrap:anywhere}
+li .meta{color:var(--muted);font-size:.85rem}
+.err{color:var(--err);font-size:.9rem}
+.ok{color:var(--ok);font-size:.9rem}
+.empty{border:1px dashed var(--line);border-radius:6px;padding:20px;text-align:center;color:var(--muted)}
+.empty b{display:block;color:var(--fg);font:400 1.1rem var(--display);margin-bottom:4px}
+.banner{background:var(--soft);border:1px solid var(--line);border-radius:6px;padding:12px 14px;font-size:.9rem}
+.chk{display:flex;align-items:center;gap:8px;font-weight:600;font-size:.9rem}
+.chk input{width:auto;padding:0}
+#login{max-width:420px;margin:0 auto}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<header class="gut"><h1>Invitation Desk</h1><p>Lushomo &amp; Edna · invitations from Pastor O. Mwiinde and Mr. E. Mumba</p><button id="out" type="button" hidden>Sign out</button></header>
+<main class="gut">
+  <div class="banner" id="status" role="status">Loading…</div>
+
+  <form class="panel" id="login" hidden novalidate>
+    <h2>Sign in</h2>
+    <label for="em">Email<input id="em" type="email" autocomplete="username" required></label>
+    <label for="pw">Password<input id="pw" type="password" autocomplete="current-password" required></label>
+    <div class="row"><button class="btn" type="submit" id="go">Sign in</button><span class="err" id="lerr" role="alert"></span></div>
+    <p class="note">Only people who were given an account can sign in. Ask Lushomo or Edna if you need one.</p>
+  </form>
+
+  <div id="app" hidden style="display:grid;gap:22px">
+    <form class="panel" id="f" novalidate>
+      <h2>Add an invited guest</h2>
+      <label for="name">Guest name(s)<small>As it should read on the card, e.g. Mr &amp; Mrs Banda, Dr. Phiri, Aunt Grace</small>
+        <input id="name" required autocomplete="off"></label>
+      <div class="two">
+        <label for="phone">WhatsApp number<small>Optional, e.g. 0977 123 456</small>
+          <input id="phone" type="tel" inputmode="tel" autocomplete="off"></label>
+        <label for="side">Invited by
+          <select id="side"><option value="">Both families</option><option value="Pastor O. Mwiinde">Pastor O. Mwiinde (groom)</option><option value="Mr. E. Mumba">Mr. E. Mumba (bride)</option></select></label>
+      </div>
+      <div class="row"><button class="btn" type="submit" id="add">Add guest</button><span class="err" id="err" role="alert"></span></div>
+    </form>
+
+    <form class="panel" id="bf" novalidate>
+      <h2>Add many guests at once</h2>
+      <label for="bulk">One guest per line<small>Name, WhatsApp number (optional), invited by (optional: groom or bride). Paste straight from Excel or Google Sheets.</small>
+        <textarea id="bulk" placeholder="Mr &amp; Mrs Banda, 0977123456, groom&#10;Dr. Phiri, 0966555111, bride&#10;Aunt Grace"></textarea></label>
+      <div class="row"><button class="btn" type="submit" id="addbulk">Add all</button><span class="err" id="berr" role="alert"></span><span class="ok" id="bok" role="status"></span></div>
+    </form>
+
+    <section class="panel">
+      <h2>Guest invitations <span class="note" id="count"></span></h2>
+      <div class="row" id="bulkbar" hidden>
+        <button class="btn gd sm" type="button" id="zipPdf">Zip of PDFs</button>
+        <button class="btn gd sm" type="button" id="zipPng">Zip of pictures</button>
+        <button class="btn alt sm" type="button" id="allPdf">One combined PDF</button>
+        <button class="btn alt sm" type="button" id="csv">Guest list (CSV)</button>
+      </div>
+      <div class="row" id="selbar" hidden>
+        <label class="chk"><input type="checkbox" id="selAll"> Select all</label>
+        <span class="note">Tick guests to make cards for just those. With none ticked, the buttons above use everyone.</span>
+      </div>
+      <span class="note" id="prog" role="status"></span>
+      <ul id="list"></ul>
+      <div class="empty" id="empty"><b>No guests yet</b>Add a name above, or paste a list. Everyone who signs in sees the same list. Each guest gets their own Picture, PDF and WhatsApp buttons.</div>
+    </section>
+  </div>
+</main>
+
+<script src="card.js"></script>
+<script type="module">
+import cfg from "./firebase-config.js";
+const V="10.12.2";
+const $=id=>document.getElementById(id);
+const configured=!String(cfg.apiKey).startsWith("PASTE");
+if(!configured){$("status").textContent="Setup needed: add your Firebase settings to firebase-config.js, then reload this page.";}
+else{
+const {initializeApp}=await import(`https://www.gstatic.com/firebasejs/${V}/firebase-app.js`);
+const A=await import(`https://www.gstatic.com/firebasejs/${V}/firebase-auth.js`);
+const F=await import(`https://www.gstatic.com/firebasejs/${V}/firebase-firestore.js`);
+const app=initializeApp(cfg),auth=A.getAuth(app),db=F.getFirestore(app);
+const INVITE=new URL("invite.html",location.href).href;
+let guests=[],busy=false,unsub=null;const sel=new Set();
+
+const intl=p=>{let d=String(p).replace(/\D/g,"");if(!d)return "";if(d.startsWith("00"))d=d.slice(2);else if(d.startsWith("0"))d="260"+d.slice(1);return d};
+const linkFor=g=>INVITE+"#for-"+encodeURIComponent(slug(g.name));
+function waUrl(g){
+  const who=(g.side||"").startsWith("Pastor")?"Pastor O. Mwiinde is inviting you to the wedding of his son Lushomo and Edna":
+    (g.side||"").startsWith("Mr.")?"Mr. E. Mumba is inviting you to the wedding of his daughter Edna and Lushomo":
+    "Pastor O. Mwiinde and Mr. E. Mumba are inviting you to the wedding of their son Lushomo and daughter Edna";
+  const t=`Dear ${g.name},\n\n${who} on 27 December 2026 in Lusaka.\n\nOpen your personal invitation here. On that page you can save your card as a picture or PDF:\n${linkFor(g)}`;
+  return "https://wa.me/"+(g.phone||"")+"?text="+encodeURIComponent(t)}
+async function copy(text,btn){const o=btn.textContent;try{await navigator.clipboard.writeText(text);btn.textContent="Copied"}catch{btn.textContent="Press Ctrl+C";const i=document.createElement("input");i.value=text;btn.after(i);i.select()}setTimeout(()=>btn.textContent=o,1800)}
+function offer(data,name){const blob=data instanceof Blob?data:new Blob([data],{type:"text/csv"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000)}
+
+function setBusy(b,msg){busy=b;document.querySelectorAll("#list button,#allPdf,#zipPdf,#zipPng").forEach(x=>x.disabled=b);$("prog").textContent=msg||""}
+async function one(g,kind){
+  if(busy)return;setBusy(true,"Making card…");
+  try{const c=await drawCard(g);offer(kind==="png"?await blobOf(c,"image/png"):await makePdf([c]),fname(g,kind));setBusy(false,"")}
+  catch(e){setBusy(false,"Could not make the card: "+e.message)}}
+const targets=()=>sel.size?guests.filter(g=>sel.has(g.id)):guests;
+async function all(kind){
+  const list=targets();
+  if(busy||!list.length)return;setBusy(true,"Making cards…");
+  try{const cs=[],files=[],used={};
+    for(let i=0;i<list.length;i++){$("prog").textContent=`Making card ${i+1} of ${list.length}…`;
+      const c=await drawCard(list[i]);
+      if(kind==="pdf")cs.push(c);
+      else{const ext=kind==="zippdf"?"pdf":"png";let nm=fname(list[i],ext);if(used[nm])nm=nm.replace("."+ext,"-"+(i+1)+"."+ext);used[nm]=1;
+        const blob=ext==="pdf"?await makePdf([c]):await blobOf(c,"image/png");
+        files.push({name:nm,data:new Uint8Array(await blob.arrayBuffer())})}
+      await new Promise(r=>setTimeout(r))}
+    const blob=kind==="pdf"?await makePdf(cs):makeZip(files);
+    setBusy(false,"");offer(blob,kind==="pdf"?"invitations.pdf":kind==="zippdf"?"invitations-pdf.zip":"invitations-pictures.zip")}
+  catch(e){setBusy(false,"Could not make the cards: "+e.message)}}
+function updSel(){const n=sel.size,t=n?`Selected (${n})`:"All";
+  $("zipPdf").textContent=t+" · zip of PDFs";$("zipPng").textContent=t+" · zip of pictures";$("allPdf").textContent=t+" · one PDF";
+  $("selAll").checked=guests.length>0&&n===guests.length;$("selAll").indeterminate=n>0&&n<guests.length}
+function render(){
+  const ul=$("list");ul.textContent="";
+  guests.forEach(g=>{
+    const li=document.createElement("li");
+    const head=document.createElement("label");head.className="chk";
+    const cb=document.createElement("input");cb.type="checkbox";cb.checked=sel.has(g.id);cb.onchange=()=>{cb.checked?sel.add(g.id):sel.delete(g.id);updSel()};
+    const b=document.createElement("b");b.textContent=g.name;head.append(cb,b);
+    const m=document.createElement("span");m.className="meta";
+    m.textContent=[g.side||"Both families",g.phone?"+"+g.phone:""].filter(Boolean).join(" · ");
+    const r=document.createElement("div");r.className="row";
+    const mk=(txt,cls,fn)=>{const x=document.createElement("button");x.type="button";x.className="btn "+cls+" sm";x.textContent=txt;x.onclick=()=>fn(x);return x};
+    const w=document.createElement("a");w.className="btn gd sm";w.textContent=g.phone?"Send on WhatsApp":"Share on WhatsApp";w.href=waUrl(g);w.target="_blank";w.rel="noopener";
+    const v=document.createElement("a");v.className="btn alt sm";v.textContent="Preview";v.href=linkFor(g);v.target="_blank";v.rel="noopener";
+    r.append(w,mk("Picture","alt",()=>one(g,"png")),mk("PDF","alt",()=>one(g,"pdf")),mk("Copy link","alt",x=>copy(linkFor(g),x)),v,
+      mk("Remove","alt",async x=>{x.disabled=true;try{await F.deleteDoc(F.doc(db,"guests",g.id))}catch(e){x.disabled=false;$("prog").textContent="Could not remove: "+e.code}}));
+    li.append(head,m,r);ul.append(li)});
+  for(const id of [...sel])if(!guests.some(g=>g.id===id))sel.delete(id);
+  $("empty").hidden=guests.length>0;$("bulkbar").hidden=$("selbar").hidden=guests.length===0;updSel();
+  $("count").textContent=guests.length?"("+guests.length+")":"";
+  document.querySelectorAll("#list button").forEach(x=>x.disabled=busy)}
+const addDoc=g=>F.addDoc(F.collection(db,"guests"),{name:g.name,phone:g.phone,side:g.side,createdAt:Date.now()});
+$("f").addEventListener("submit",async e=>{e.preventDefault();
+  const name=$("name").value.trim();
+  if(!slug(name)){$("err").textContent="Please enter the guest's name.";$("name").focus();return}
+  $("err").textContent="";$("add").disabled=true;
+  try{await addDoc({name,phone:intl($("phone").value),side:$("side").value});$("name").value="";$("phone").value="";$("name").focus()}
+  catch(x){$("err").textContent="Could not save: "+x.code}
+  $("add").disabled=false});
+const sideOf=s=>{s=(s||"").trim().toLowerCase();return /^(g|groom|pastor|mwiinde|son|lushomo)/.test(s)?"Pastor O. Mwiinde":/^(b|bride|mr|mumba|daughter|edna)/.test(s)?"Mr. E. Mumba":""};
+$("bf").addEventListener("submit",async e=>{e.preventDefault();$("berr").textContent=$("bok").textContent="";
+  const rows=$("bulk").value.split(/\r?\n/).map(l=>l.trim()).filter(Boolean),list=[];let skipped=0;
+  rows.forEach((l,i)=>{
+    const cells=(l.includes("\t")?l.split("\t"):l.split(/,(?=(?:[^"]*"[^"]*")*[^"]*$)/)).map(c=>c.trim().replace(/^"|"$/g,"").replace(/""/g,'"'));
+    if(i===0&&/^(guest\s*)?names?$/i.test(cells[0]))return;
+    if(!slug(cells[0]||"")){skipped++;return}
+    list.push({name:cells[0],phone:intl(cells[1]||""),side:sideOf(cells[2])})});
+  if(!list.length){$("berr").textContent="No guests found. Put one name per line.";return}
+  $("addbulk").disabled=true;
+  try{for(let i=0;i<list.length;i+=400){const b=F.writeBatch(db);
+      list.slice(i,i+400).forEach((g,k)=>b.set(F.doc(F.collection(db,"guests")),{name:g.name,phone:g.phone,side:g.side,createdAt:Date.now()+i+k}));await b.commit()}
+    $("bulk").value="";$("bok").textContent=`Added ${list.length} guest${list.length>1?"s":""}${skipped?` (${skipped} skipped)`:""}.`}
+  catch(x){$("berr").textContent="Could not save: "+x.code}
+  $("addbulk").disabled=false});
+$("allPdf").onclick=()=>all("pdf");$("zipPdf").onclick=()=>all("zippdf");$("zipPng").onclick=()=>all("zippng");
+$("selAll").onchange=e=>{sel.clear();if(e.target.checked)guests.forEach(g=>sel.add(g.id));render()};
+$("csv").onclick=()=>{const q=s=>'"'+String(s).replace(/"/g,'""')+'"';
+  const rows=[["Name","Phone","Invited by","Link"],...guests.map(g=>[g.name,g.phone,g.side||"Both families",linkFor(g)])];
+  offer("﻿"+rows.map(r=>r.map(q).join(",")).join("\r\n"),"invited-guests.csv")};
+
+$("login").addEventListener("submit",async e=>{e.preventDefault();$("lerr").textContent="";$("go").disabled=true;
+  try{await A.signInWithEmailAndPassword(auth,$("em").value.trim(),$("pw").value)}
+  catch(x){$("lerr").textContent=/invalid|wrong|user-not-found|credential/.test(x.code)?"Email or password is not correct.":x.code==="auth/too-many-requests"?"Too many tries. Wait a few minutes.":"Could not sign in ("+x.code+")."}
+  $("go").disabled=false});
+$("out").onclick=()=>A.signOut(auth);
+A.onAuthStateChanged(auth,u=>{
+  if(unsub){unsub();unsub=null}
+  guests=[];sel.clear();
+  $("login").hidden=!!u;$("app").hidden=!u;$("out").hidden=!u;
+  if(!u){$("status").hidden=true;return}
+  $("status").hidden=false;$("status").textContent="Loading the guest list…";
+  unsub=F.onSnapshot(F.query(F.collection(db,"guests"),F.orderBy("createdAt","asc")),snap=>{
+    $("status").hidden=true;guests=snap.docs.map(d=>({id:d.id,...d.data()}));render()},
+    e=>{$("status").hidden=false;$("status").textContent=e.code==="permission-denied"?"This account is not allowed to see the guest list. Ask Lushomo or Edna to add it.":"Could not load the guest list ("+e.code+")."})});
+}
+</script>
+</body>
+</html>

@@ -1,6 +1,6 @@
 # Lushomo & Edna · Wedding
 
-Wedding website for Lushomo Mwiinde and Edna Mumba, 27 December 2026, Lusaka.
+Wedding website for Lushomo Mwiinde and Edna Mumba, 27 December 2026, Monze.
 
 Live site: https://lushomo-96.github.io/Lushomo-Edna-Wedding/
 

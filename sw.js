@@ -2,7 +2,7 @@
    Pages and same-site files refresh themselves in the background, so most edits
    reach guests on their next visit. Bump CACHE_NAME for a big change (new photo,
    icons) to force a clean cache. */
-const CACHE_NAME = 'le-wedding-v2';
+const CACHE_NAME = 'le-wedding-v3';
 const PRECACHE = ['./', 'index.html', 'manifest.json', 'assets/couple.jpg',
   'assets/icon-192.png', 'assets/icon-512.png', 'assets/icon-512-maskable.png'];
 

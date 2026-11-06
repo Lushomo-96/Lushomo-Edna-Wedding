@@ -2,7 +2,8 @@
 const PHOTO="assets/couple.jpg";
 const slug=s=>s.trim().toLowerCase().replace(/&/g," and ").replace(/[^\p{L}\p{N}\s-]/gu,"").replace(/\s+/g,"-").replace(/-+/g,"-").replace(/^-|-$/g,"");
 /* ---------- Card drawing ---------- */
-const CW=1080,CH=1960,GOLD="#e3c77d",INK="#f6f3ea";
+const GIFT="K500",ADMITS="two";
+const CW=1080,CH=2060,GOLD="#e3c77d",INK="#f6f3ea";
 let photo=null,fontsReady=null;
 function ready(){
   if(!fontsReady)fontsReady=Promise.all([
@@ -24,12 +25,18 @@ async function drawCard(g){
   ctx.globalAlpha=.4;ctx.lineWidth=2;ctx.strokeRect(54,54,CW-108,CH-108);ctx.globalAlpha=1;
   diamonds(ctx,96);diamonds(ctx,CH-96);
   if(g&&g.name){const s=fit(ctx,"Dear "+g.name+",",'{} "Pinyon Script"',76,840);tx(ctx,"Dear "+g.name+",",200,s+'px "Pinyon Script"',GOLD)}
-  tx(ctx,"WITH JOY",g&&g.name?276:226,'600 24px "Figtree"',GOLD,"7px");
-  tx(ctx,"Pastor O. Mwiinde",362,'56px "Gloock"',GOLD);
-  tx(ctx,"and",424,'60px "Pinyon Script"',INK);
-  tx(ctx,"Mr. E. Mumba",494,'56px "Gloock"',GOLD);
-  tx(ctx,"are inviting you to the wedding of",570,'32px "Figtree"',INK);
-  tx(ctx,"their son and daughter",614,'32px "Figtree"',INK);
+  const couple=g&&g.style==="couple";
+  tx(ctx,couple?"TOGETHER WITH THEIR FAMILIES":"WITH JOY",g&&g.name?276:226,'600 24px "Figtree"',GOLD,"7px");
+  if(couple){
+    tx(ctx,"We joyfully invite you",450,'74px "Pinyon Script"',INK);
+    tx(ctx,"to celebrate our wedding",546,'34px "Figtree"',INK);
+  }else{
+    tx(ctx,"Pastor O. Mwiinde",362,'56px "Gloock"',GOLD);
+    tx(ctx,"and",424,'60px "Pinyon Script"',INK);
+    tx(ctx,"Mr. E. Mumba",494,'56px "Gloock"',GOLD);
+    tx(ctx,"are inviting you to the wedding of",570,'32px "Figtree"',INK);
+    tx(ctx,"their son and daughter",614,'32px "Figtree"',INK);
+  }
   rule(ctx,672);
   const w=420,h=540,x0=CW/2-w/2,top=724,r=w/2;
   const arch=i=>{ctx.beginPath();ctx.moveTo(x0+i,top+h-i);ctx.lineTo(x0+i,top+r);ctx.arc(CW/2,top+r,r-i,Math.PI,0);ctx.lineTo(x0+w-i,top+h-i);ctx.closePath()};
@@ -41,11 +48,13 @@ async function drawCard(g){
   tx(ctx,"and",1450,'76px "Pinyon Script"',GOLD);
   tx(ctx,"Edna",1560,'120px "Gloock"',INK);
   tx(ctx,"Sunday, 27 December 2026",1650,'46px "Gloock"',INK,"2px");
-  tx(ctx,"LUSAKA · ZAMBIA",1696,'600 24px "Figtree"',GOLD,"7px");
+  tx(ctx,"MONZE · ZAMBIA",1696,'600 24px "Figtree"',GOLD,"7px");
   rule(ctx,1740);
+  tx(ctx,"ADMITS "+ADMITS.toUpperCase()+" GUESTS",1794,'600 24px "Figtree"',GOLD,"7px");
+  tx(ctx,"Gift: "+GIFT,1850,'46px "Gloock"',INK);
   ctx.globalAlpha=.85;
-  tx(ctx,"Venue and programme times will be shared soon.",1788,'28px "Figtree"',INK);
-  tx(ctx,"Kindly reply by 10 December 2026.",1826,'28px "Figtree"',INK);ctx.globalAlpha=1;
+  tx(ctx,"Venue and programme times will be shared soon.",1912,'28px "Figtree"',INK);
+  tx(ctx,"Kindly reply by 10 December 2026.",1950,'28px "Figtree"',INK);ctx.globalAlpha=1;
   return c}
 const blobOf=(c,type,q)=>new Promise(res=>c.toBlob(res,type,q));
 const fname=(g,ext)=>"invitation-"+(slug(g.name)||"guest")+"."+ext;

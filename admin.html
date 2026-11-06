@@ -50,6 +50,10 @@ li .meta{color:var(--muted);font-size:.85rem}
 .chk{display:flex;align-items:center;gap:8px;font-weight:600;font-size:.9rem}
 .chk input{width:auto;padding:0}
 #login{max-width:420px;margin:0 auto}
+.tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.tab{font:600 .92rem var(--body);padding:12px 10px;border:1.5px solid var(--line);border-radius:6px;background:var(--surface);color:var(--fg);cursor:pointer}
+.tab[aria-selected="true"]{border-color:var(--gold-fill);background:var(--soft);color:var(--blue)}
+.tab:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
 [hidden]{display:none!important}
 </style>
 </head>
@@ -67,6 +71,11 @@ li .meta{color:var(--muted);font-size:.85rem}
   </form>
 
   <div id="app" hidden style="display:grid;gap:22px">
+    <div class="tabs" role="tablist" aria-label="Card type">
+      <button type="button" role="tab" class="tab" id="tabParents" aria-selected="true">Parents' invitations <span class="note" id="nParents"></span></button>
+      <button type="button" role="tab" class="tab" id="tabCouple" aria-selected="false">Couple's invitations <span class="note" id="nCouple"></span></button>
+    </div>
+    <p class="note" id="modeNote"></p>
     <form class="panel" id="f" novalidate>
       <h2>Add an invited guest</h2>
       <label for="name">Guest name(s)<small>As it should read on the card, e.g. Mr &amp; Mrs Banda, Dr. Phiri, Aunt Grace</small>
@@ -74,7 +83,7 @@ li .meta{color:var(--muted);font-size:.85rem}
       <div class="two">
         <label for="phone">WhatsApp number<small>Optional, e.g. 0977 123 456</small>
           <input id="phone" type="tel" inputmode="tel" autocomplete="off"></label>
-        <label for="side">Invited by
+        <label for="side" id="sideLbl">Invited by
           <select id="side"><option value="">Both families</option><option value="Pastor O. Mwiinde">Pastor O. Mwiinde (groom)</option><option value="Mr. E. Mumba">Mr. E. Mumba (bride)</option></select></label>
       </div>
       <div class="row"><button class="btn" type="submit" id="add">Add guest</button><span class="err" id="err" role="alert"></span></div>
@@ -88,7 +97,7 @@ li .meta{color:var(--muted);font-size:.85rem}
     </form>
 
     <section class="panel">
-      <h2>Guest invitations <span class="note" id="count"></span></h2>
+      <h2 id="listTitle"><span>Guest invitations </span><span class="note" id="count"></span></h2>
       <div class="row" id="bulkbar" hidden>
         <button class="btn gd sm" type="button" id="zipPdf">Zip of PDFs</button>
         <button class="btn gd sm" type="button" id="zipPng">Zip of pictures</button>
@@ -101,7 +110,7 @@ li .meta{color:var(--muted);font-size:.85rem}
       </div>
       <span class="note" id="prog" role="status"></span>
       <ul id="list"></ul>
-      <div class="empty" id="empty"><b>No guests yet</b>Add a name above, or paste a list. Everyone who signs in sees the same list. Each guest gets their own Picture, PDF and WhatsApp buttons.</div>
+      <div class="empty" id="empty"><b>No guests here yet</b>Add a name above, or paste a list. Everyone who signs in sees the same list. Each guest gets their own Picture, PDF and WhatsApp buttons.</div>
     </section>
   </div>
 </main>
@@ -119,15 +128,17 @@ const A=await import(`https://www.gstatic.com/firebasejs/${V}/firebase-auth.js`)
 const F=await import(`https://www.gstatic.com/firebasejs/${V}/firebase-firestore.js`);
 const app=initializeApp(cfg),auth=A.getAuth(app),db=F.getFirestore(app);
 const INVITE=new URL("invite.html",location.href).href;
-let guests=[],busy=false,unsub=null;const sel=new Set();
+let guests=[],busy=false,unsub=null,mode="parents";const sel=new Set();
+const styleOf=g=>g.style==="couple"?"couple":"parents";
+const view=()=>guests.filter(g=>styleOf(g)===mode);
 
 const intl=p=>{let d=String(p).replace(/\D/g,"");if(!d)return "";if(d.startsWith("00"))d=d.slice(2);else if(d.startsWith("0"))d="260"+d.slice(1);return d};
-const linkFor=g=>INVITE+"#for-"+encodeURIComponent(slug(g.name));
+const linkFor=g=>INVITE+"#"+(styleOf(g)==="couple"?"couple-":"")+"for-"+encodeURIComponent(slug(g.name));
 function waUrl(g){
-  const who=(g.side||"").startsWith("Pastor")?"Pastor O. Mwiinde is inviting you to the wedding of his son Lushomo and Edna":
+  const who=styleOf(g)==="couple"?"Lushomo and Edna, together with their families, are inviting you to celebrate their wedding":(g.side||"").startsWith("Pastor")?"Pastor O. Mwiinde is inviting you to the wedding of his son Lushomo and Edna":
     (g.side||"").startsWith("Mr.")?"Mr. E. Mumba is inviting you to the wedding of his daughter Edna and Lushomo":
     "Pastor O. Mwiinde and Mr. E. Mumba are inviting you to the wedding of their son Lushomo and daughter Edna";
-  const t=`Dear ${g.name},\n\n${who} on 27 December 2026 in Lusaka.\n\nOpen your personal invitation here. On that page you can save your card as a picture or PDF:\n${linkFor(g)}`;
+  const t=`Dear ${g.name},\n\n${who} on 27 December 2026 in Monze.\n\nOpen your personal invitation here. On that page you can save your card as a picture or PDF:\n${linkFor(g)}`;
   return "https://wa.me/"+(g.phone||"")+"?text="+encodeURIComponent(t)}
 async function copy(text,btn){const o=btn.textContent;try{await navigator.clipboard.writeText(text);btn.textContent="Copied"}catch{btn.textContent="Press Ctrl+C";const i=document.createElement("input");i.value=text;btn.after(i);i.select()}setTimeout(()=>btn.textContent=o,1800)}
 function offer(data,name){const blob=data instanceof Blob?data:new Blob([data],{type:"text/csv"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000)}
@@ -137,7 +148,7 @@ async function one(g,kind){
   if(busy)return;setBusy(true,"Making card…");
   try{const c=await drawCard(g);offer(kind==="png"?await blobOf(c,"image/png"):await makePdf([c]),fname(g,kind));setBusy(false,"")}
   catch(e){setBusy(false,"Could not make the card: "+e.message)}}
-const targets=()=>sel.size?guests.filter(g=>sel.has(g.id)):guests;
+const targets=()=>sel.size?view().filter(g=>sel.has(g.id)):view();
 async function all(kind){
   const list=targets();
   if(busy||!list.length)return;setBusy(true,"Making cards…");
@@ -150,20 +161,20 @@ async function all(kind){
         files.push({name:nm,data:new Uint8Array(await blob.arrayBuffer())})}
       await new Promise(r=>setTimeout(r))}
     const blob=kind==="pdf"?await makePdf(cs):makeZip(files);
-    setBusy(false,"");offer(blob,kind==="pdf"?"invitations.pdf":kind==="zippdf"?"invitations-pdf.zip":"invitations-pictures.zip")}
+    setBusy(false,"");offer(blob,(mode==="couple"?"couple-":"parents-")+(kind==="pdf"?"invitations.pdf":kind==="zippdf"?"invitations-pdf.zip":"invitations-pictures.zip"))}
   catch(e){setBusy(false,"Could not make the cards: "+e.message)}}
 function updSel(){const n=sel.size,t=n?`Selected (${n})`:"All";
   $("zipPdf").textContent=t+" · zip of PDFs";$("zipPng").textContent=t+" · zip of pictures";$("allPdf").textContent=t+" · one PDF";
-  $("selAll").checked=guests.length>0&&n===guests.length;$("selAll").indeterminate=n>0&&n<guests.length}
+  const v=view().length;$("selAll").checked=v>0&&n===v;$("selAll").indeterminate=n>0&&n<v}
 function render(){
   const ul=$("list");ul.textContent="";
-  guests.forEach(g=>{
+  view().forEach(g=>{
     const li=document.createElement("li");
     const head=document.createElement("label");head.className="chk";
     const cb=document.createElement("input");cb.type="checkbox";cb.checked=sel.has(g.id);cb.onchange=()=>{cb.checked?sel.add(g.id):sel.delete(g.id);updSel()};
     const b=document.createElement("b");b.textContent=g.name;head.append(cb,b);
     const m=document.createElement("span");m.className="meta";
-    m.textContent=[g.side||"Both families",g.phone?"+"+g.phone:""].filter(Boolean).join(" · ");
+    m.textContent=[styleOf(g)==="couple"?"Couple's invitation":(g.side||"Both families"),g.phone?"+"+g.phone:""].filter(Boolean).join(" · ");
     const r=document.createElement("div");r.className="row";
     const mk=(txt,cls,fn)=>{const x=document.createElement("button");x.type="button";x.className="btn "+cls+" sm";x.textContent=txt;x.onclick=()=>fn(x);return x};
     const w=document.createElement("a");w.className="btn gd sm";w.textContent=g.phone?"Send on WhatsApp":"Share on WhatsApp";w.href=waUrl(g);w.target="_blank";w.rel="noopener";
@@ -171,11 +182,13 @@ function render(){
     r.append(w,mk("Picture","alt",()=>one(g,"png")),mk("PDF","alt",()=>one(g,"pdf")),mk("Copy link","alt",x=>copy(linkFor(g),x)),v,
       mk("Remove","alt",async x=>{x.disabled=true;try{await F.deleteDoc(F.doc(db,"guests",g.id))}catch(e){x.disabled=false;$("prog").textContent="Could not remove: "+e.code}}));
     li.append(head,m,r);ul.append(li)});
-  for(const id of [...sel])if(!guests.some(g=>g.id===id))sel.delete(id);
-  $("empty").hidden=guests.length>0;$("bulkbar").hidden=$("selbar").hidden=guests.length===0;updSel();
-  $("count").textContent=guests.length?"("+guests.length+")":"";
+  const vs=view();for(const id of [...sel])if(!vs.some(g=>g.id===id))sel.delete(id);
+  $("empty").hidden=vs.length>0;$("bulkbar").hidden=$("selbar").hidden=vs.length===0;updSel();
+  $("count").textContent=vs.length?"("+vs.length+")":"";
+  const np=guests.filter(g=>styleOf(g)==="parents").length,nc=guests.length-np;
+  $("nParents").textContent=np?"("+np+")":"";$("nCouple").textContent=nc?"("+nc+")":"";
   document.querySelectorAll("#list button").forEach(x=>x.disabled=busy)}
-const addDoc=g=>F.addDoc(F.collection(db,"guests"),{name:g.name,phone:g.phone,side:g.side,createdAt:Date.now()});
+const addDoc=g=>F.addDoc(F.collection(db,"guests"),{name:g.name,phone:g.phone,side:mode==="couple"?"":g.side,style:mode,createdAt:Date.now()});
 $("f").addEventListener("submit",async e=>{e.preventDefault();
   const name=$("name").value.trim();
   if(!slug(name)){$("err").textContent="Please enter the guest's name.";$("name").focus();return}
@@ -194,21 +207,29 @@ $("bf").addEventListener("submit",async e=>{e.preventDefault();$("berr").textCon
   if(!list.length){$("berr").textContent="No guests found. Put one name per line.";return}
   $("addbulk").disabled=true;
   try{for(let i=0;i<list.length;i+=400){const b=F.writeBatch(db);
-      list.slice(i,i+400).forEach((g,k)=>b.set(F.doc(F.collection(db,"guests")),{name:g.name,phone:g.phone,side:g.side,createdAt:Date.now()+i+k}));await b.commit()}
+      list.slice(i,i+400).forEach((g,k)=>b.set(F.doc(F.collection(db,"guests")),{name:g.name,phone:g.phone,side:mode==="couple"?"":g.side,style:mode,createdAt:Date.now()+i+k}));await b.commit()}
     $("bulk").value="";$("bok").textContent=`Added ${list.length} guest${list.length>1?"s":""}${skipped?` (${skipped} skipped)`:""}.`}
   catch(x){$("berr").textContent="Could not save: "+x.code}
   $("addbulk").disabled=false});
 $("allPdf").onclick=()=>all("pdf");$("zipPdf").onclick=()=>all("zippdf");$("zipPng").onclick=()=>all("zippng");
-$("selAll").onchange=e=>{sel.clear();if(e.target.checked)guests.forEach(g=>sel.add(g.id));render()};
+function setMode(m){mode=m;sel.clear();
+  $("tabParents").setAttribute("aria-selected",String(m==="parents"));$("tabCouple").setAttribute("aria-selected",String(m==="couple"));
+  $("sideLbl").hidden=m==="couple";
+  $("modeNote").textContent=m==="couple"?"Couple's invitation: starts with \"Together with their families\" and is signed by Lushomo and Edna. Guests added here get this card.":"Parents' invitation: starts with Pastor O. Mwiinde and Mr. E. Mumba inviting the guest. Guests added here get this card.";
+  $("listTitle").firstChild.textContent=m==="couple"?"Couple's guests ":"Parents' guests ";
+  render()}
+$("tabParents").onclick=()=>setMode("parents");$("tabCouple").onclick=()=>setMode("couple");
+$("selAll").onchange=e=>{sel.clear();if(e.target.checked)view().forEach(g=>sel.add(g.id));render()};
 $("csv").onclick=()=>{const q=s=>'"'+String(s).replace(/"/g,'""')+'"';
-  const rows=[["Name","Phone","Invited by","Link"],...guests.map(g=>[g.name,g.phone,g.side||"Both families",linkFor(g)])];
-  offer("﻿"+rows.map(r=>r.map(q).join(",")).join("\r\n"),"invited-guests.csv")};
+  const rows=[["Name","Phone","Card","Invited by","Link"],...view().map(g=>[g.name,g.phone,styleOf(g)==="couple"?"Couple's invitation":"Parents' invitation",styleOf(g)==="couple"?"":(g.side||"Both families"),linkFor(g)])];
+  offer("﻿"+rows.map(r=>r.map(q).join(",")).join("\r\n"),(mode==="couple"?"couple":"parents")+"-invited-guests.csv")};
 
 $("login").addEventListener("submit",async e=>{e.preventDefault();$("lerr").textContent="";$("go").disabled=true;
   try{await A.signInWithEmailAndPassword(auth,$("em").value.trim(),$("pw").value)}
   catch(x){$("lerr").textContent=/invalid|wrong|user-not-found|credential/.test(x.code)?"Email or password is not correct.":x.code==="auth/too-many-requests"?"Too many tries. Wait a few minutes.":"Could not sign in ("+x.code+")."}
   $("go").disabled=false});
 $("out").onclick=()=>A.signOut(auth);
+setMode("parents");
 A.onAuthStateChanged(auth,u=>{
   if(unsub){unsub();unsub=null}
   guests=[];sel.clear();

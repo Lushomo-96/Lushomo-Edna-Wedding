@@ -104,7 +104,7 @@ function wa(g){
   const who=g.side.startsWith("Pastor")?"Pastor O. Mwiinde is inviting you to the wedding of his son Lushomo and Edna":
     g.side.startsWith("Mr.")?"Mr. E. Mumba is inviting you to the wedding of his daughter Edna and Lushomo":
     "Pastor O. Mwiinde and Mr. E. Mumba are inviting you to the wedding of their son Lushomo and daughter Edna";
-  const t=`Dear ${g.name},\n\n${who} on 27 December 2026 in Lusaka.\n\nYour invitation: ${linkFor(g)}`;
+  const t=`Dear ${g.name},\n\n${who} on 27 December 2026 in Monze.\n\nYour invitation: ${linkFor(g)}`;
   return "https://wa.me/"+(g.phone?g.phone:"")+"?text="+encodeURIComponent(t)}
 async function copy(text,btn){try{await navigator.clipboard.writeText(text);const o=btn.textContent;btn.textContent="Copied";setTimeout(()=>btn.textContent=o,1500)}catch{prompt("Copy this link:",text)}}
 
@@ -149,7 +149,7 @@ async function drawCard(g){
   tx(ctx,"and",1450,'76px "Pinyon Script"',GOLD);
   tx(ctx,"Edna",1560,'120px "Gloock"',INK);
   tx(ctx,"Sunday, 27 December 2026",1650,'46px "Gloock"',INK,"2px");
-  tx(ctx,"LUSAKA · ZAMBIA",1696,'600 24px "Figtree"',GOLD,"7px");
+  tx(ctx,"MONZE · ZAMBIA",1696,'600 24px "Figtree"',GOLD,"7px");
   rule(ctx,1740);
   ctx.globalAlpha=.85;
   tx(ctx,"Venue and programme times will be shared soon.",1788,'28px "Figtree"',INK);

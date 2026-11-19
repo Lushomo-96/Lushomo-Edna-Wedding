@@ -9,7 +9,8 @@ const CW=1080,CH=2060,GOLD="#e3c77d",INK="#f6f3ea";
 let photo=null,fontsReady=null;
 function ready(){
   if(!fontsReady)fontsReady=Promise.all([
-    document.fonts.load('54px "Gloock"'),document.fonts.load('60px "Pinyon Script"'),document.fonts.load('32px "Figtree"'),document.fonts.load('600 32px "Figtree"'),
+    /* A font that fails to load (offline, blocked) must not stop the card: fall back to a system font. */
+    ...['54px "Gloock"','60px "Pinyon Script"','32px "Figtree"','600 32px "Figtree"','italic 32px "Figtree"'].map(f=>Promise.race([document.fonts.load(f).catch(()=>{}),new Promise(r=>setTimeout(r,8000))])),
     new Promise((res,rej)=>{photo=new Image();photo.onload=res;photo.onerror=()=>rej(new Error("Photo failed to load"));photo.src=PHOTO})
   ]).catch(e=>{fontsReady=null;throw e});
   return fontsReady}

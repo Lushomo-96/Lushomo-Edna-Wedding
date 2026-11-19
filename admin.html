@@ -50,7 +50,7 @@ li .meta{color:var(--muted);font-size:.85rem}
 .chk{display:flex;align-items:center;gap:8px;font-weight:600;font-size:.9rem}
 .chk input{width:auto;padding:0}
 #login{max-width:420px;margin:0 auto}
-.tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.tabs{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px}
 .tab{font:600 .92rem var(--body);padding:12px 10px;border:1.5px solid var(--line);border-radius:6px;background:var(--surface);color:var(--fg);cursor:pointer}
 .tab[aria-selected="true"]{border-color:var(--gold-fill);background:var(--soft);color:var(--blue)}
 .tab:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
@@ -74,12 +74,18 @@ li .meta{color:var(--muted);font-size:.85rem}
     <div class="tabs" role="tablist" aria-label="Card type">
       <button type="button" role="tab" class="tab" id="tabParents" aria-selected="true">Parents' invitations <span class="note" id="nParents"></span></button>
       <button type="button" role="tab" class="tab" id="tabCouple" aria-selected="false">Couple's invitations <span class="note" id="nCouple"></span></button>
+      <button type="button" role="tab" class="tab" id="tabRep" aria-selected="false">Church &amp; hospital representatives <span class="note" id="nRep"></span></button>
     </div>
     <p class="note" id="modeNote"></p>
     <form class="panel" id="f" novalidate>
       <h2>Add an invited guest</h2>
-      <label for="name">Guest name(s)<small>As it should read on the card, e.g. Mr &amp; Mrs Banda, Dr. Phiri, Aunt Grace</small>
+      <label for="name" id="nameLbl">Guest name(s)<small>As it should read on the card, e.g. Mr &amp; Mrs Banda, Dr. Phiri, Aunt Grace</small>
         <input id="name" required autocomplete="off"></label>
+      <div id="repFields" class="two" hidden>
+        <label for="kind">Represents<select id="kind"><option value="church">A church</option><option value="hospital">A hospital</option></select></label>
+        <label for="org" id="orgLbl">Name of church<small id="orgHelp">e.g. Monze SDA Church</small><input id="org" autocomplete="off"></label>
+        <label for="pos" id="posLbl" style="grid-column:1/-1">Position<small id="posHelp">e.g. Elder, Youth Leader, Deaconess</small><input id="pos" autocomplete="off"></label>
+      </div>
       <div class="two">
         <label for="phone">WhatsApp number<small>Optional, e.g. 0977 123 456</small>
           <input id="phone" type="tel" inputmode="tel" autocomplete="off"></label>
@@ -91,7 +97,7 @@ li .meta{color:var(--muted);font-size:.85rem}
 
     <form class="panel" id="bf" novalidate>
       <h2>Add many guests at once</h2>
-      <label for="bulk">One guest per line<small>Name, WhatsApp number (optional), invited by (optional: groom or bride). Paste straight from Excel or Google Sheets.</small>
+      <label for="bulk">One guest per line<small id="bulkHelp">Name, WhatsApp number (optional), invited by (optional: groom or bride). Paste straight from Excel or Google Sheets.</small>
         <textarea id="bulk" placeholder="Mr &amp; Mrs Banda, 0977123456, groom&#10;Dr. Phiri, 0966555111, bride&#10;Aunt Grace"></textarea></label>
       <div class="row"><button class="btn" type="submit" id="addbulk">Add all</button><span class="err" id="berr" role="alert"></span><span class="ok" id="bok" role="status"></span></div>
     </form>
@@ -129,16 +135,17 @@ const F=await import(`https://www.gstatic.com/firebasejs/${V}/firebase-firestore
 const app=initializeApp(cfg),auth=A.getAuth(app),db=F.getFirestore(app);
 const INVITE=new URL("invite.html",location.href).href;
 let guests=[],busy=false,unsub=null,mode="parents";const sel=new Set();
-const styleOf=g=>g.style==="couple"?"couple":"parents";
+const styleOf=g=>g.style==="couple"?"couple":g.style==="rep"?"rep":"parents";
+const PREFIX={parents:"",couple:"couple-",rep:"rep-"};
 const view=()=>guests.filter(g=>styleOf(g)===mode);
 
 const intl=p=>{let d=String(p).replace(/\D/g,"");if(!d)return "";if(d.startsWith("00"))d=d.slice(2);else if(d.startsWith("0"))d="260"+d.slice(1);return d};
-const linkFor=g=>INVITE+"#"+(styleOf(g)==="couple"?"couple-":"")+"for-"+encodeURIComponent(slug(g.name));
+const linkFor=g=>INVITE+"#"+(styleOf(g)==="rep"?"rep":PREFIX[styleOf(g)]+"for-"+encodeURIComponent(slug(g.name)))+(styleOf(g)==="rep"?"&org="+encodeURIComponent(g.org||"")+"&pos="+encodeURIComponent(g.pos||""):"");
 function waUrl(g){
-  const who=styleOf(g)==="couple"?"Lushomo and Edna, together with their families, are inviting you to celebrate their wedding":(g.side||"").startsWith("Pastor")?"Pastor O. Mwiinde is inviting you to the wedding of his son Lushomo and Edna":
+  const who=styleOf(g)==="rep"?"Pastor O. Mwiinde and Mr. E. Mumba are inviting the representatives of "+(g.org||"your church or hospital")+(g.pos?" ("+g.pos+")":"")+" to the wedding of their son Lushomo and daughter Edna":styleOf(g)==="couple"?"Lushomo and Edna, together with their families, are inviting you to celebrate their wedding":(g.side||"").startsWith("Pastor")?"Pastor O. Mwiinde is inviting you to the wedding of his son Lushomo and Edna":
     (g.side||"").startsWith("Mr.")?"Mr. E. Mumba is inviting you to the wedding of his daughter Edna and Lushomo":
     "Pastor O. Mwiinde and Mr. E. Mumba are inviting you to the wedding of their son Lushomo and daughter Edna";
-  const t=`Dear ${g.name},\n\n${who} on 27 December 2026 in Monze.\n\nOpen your personal invitation here. On that page you can save your card as a picture or PDF:\n${linkFor(g)}`;
+  const t=`${styleOf(g)==="rep"?"Dear Representatives":"Dear "+g.name},\n\n${who} on 27 December 2026 in Monze.\n\nOpen your personal invitation here. On that page you can save your card as a picture or PDF:\n${linkFor(g)}`;
   return "https://wa.me/"+(g.phone||"")+"?text="+encodeURIComponent(t)}
 async function copy(text,btn){const o=btn.textContent;try{await navigator.clipboard.writeText(text);btn.textContent="Copied"}catch{btn.textContent="Press Ctrl+C";const i=document.createElement("input");i.value=text;btn.after(i);i.select()}setTimeout(()=>btn.textContent=o,1800)}
 function offer(data,name){const blob=data instanceof Blob?data:new Blob([data],{type:"text/csv"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000)}
@@ -161,7 +168,7 @@ async function all(kind){
         files.push({name:nm,data:new Uint8Array(await blob.arrayBuffer())})}
       await new Promise(r=>setTimeout(r))}
     const blob=kind==="pdf"?await makePdf(cs):makeZip(files);
-    setBusy(false,"");offer(blob,(mode==="couple"?"couple-":"parents-")+(kind==="pdf"?"invitations.pdf":kind==="zippdf"?"invitations-pdf.zip":"invitations-pictures.zip"))}
+    setBusy(false,"");offer(blob,({parents:"parents-",couple:"couple-",rep:"representatives-"})[mode]+(kind==="pdf"?"invitations.pdf":kind==="zippdf"?"invitations-pdf.zip":"invitations-pictures.zip"))}
   catch(e){setBusy(false,"Could not make the cards: "+e.message)}}
 function updSel(){const n=sel.size,t=n?`Selected (${n})`:"All";
   $("zipPdf").textContent=t+" · zip of PDFs";$("zipPng").textContent=t+" · zip of pictures";$("allPdf").textContent=t+" · one PDF";
@@ -174,7 +181,7 @@ function render(){
     const cb=document.createElement("input");cb.type="checkbox";cb.checked=sel.has(g.id);cb.onchange=()=>{cb.checked?sel.add(g.id):sel.delete(g.id);updSel()};
     const b=document.createElement("b");b.textContent=g.name;head.append(cb,b);
     const m=document.createElement("span");m.className="meta";
-    m.textContent=[styleOf(g)==="couple"?"Couple's invitation":(g.side||"Both families"),g.phone?"+"+g.phone:""].filter(Boolean).join(" · ");
+    m.textContent=[styleOf(g)==="couple"?"Couple's invitation":styleOf(g)==="rep"?(g.pos||"Representatives"):(g.side||"Both families"),g.phone?"+"+g.phone:""].filter(Boolean).join(" · ");
     const r=document.createElement("div");r.className="row";
     const mk=(txt,cls,fn)=>{const x=document.createElement("button");x.type="button";x.className="btn "+cls+" sm";x.textContent=txt;x.onclick=()=>fn(x);return x};
     const w=document.createElement("a");w.className="btn gd sm";w.textContent=g.phone?"Send on WhatsApp":"Share on WhatsApp";w.href=waUrl(g);w.target="_blank";w.rel="noopener";
@@ -185,15 +192,19 @@ function render(){
   const vs=view();for(const id of [...sel])if(!vs.some(g=>g.id===id))sel.delete(id);
   $("empty").hidden=vs.length>0;$("bulkbar").hidden=$("selbar").hidden=vs.length===0;updSel();
   $("count").textContent=vs.length?"("+vs.length+")":"";
-  const np=guests.filter(g=>styleOf(g)==="parents").length,nc=guests.length-np;
-  $("nParents").textContent=np?"("+np+")":"";$("nCouple").textContent=nc?"("+nc+")":"";
+  const cnt=s=>guests.filter(g=>styleOf(g)===s).length,np=cnt("parents"),nc=cnt("couple"),nr=cnt("rep");
+  $("nParents").textContent=np?"("+np+")":"";$("nCouple").textContent=nc?"("+nc+")":"";$("nRep").textContent=nr?"("+nr+")":"";
   document.querySelectorAll("#list button").forEach(x=>x.disabled=busy)}
-const addDoc=g=>F.addDoc(F.collection(db,"guests"),{name:g.name,phone:g.phone,side:mode==="couple"?"":g.side,style:mode,createdAt:Date.now()});
+const docOf=(g,t)=>({name:g.name,phone:g.phone,side:mode==="parents"?g.side:"",style:mode,createdAt:t,...(mode==="rep"?{org:g.org,pos:g.pos,kind:g.kind}:{})});
+const addDoc=g=>F.addDoc(F.collection(db,"guests"),docOf(g,Date.now()));
 $("f").addEventListener("submit",async e=>{e.preventDefault();
-  const name=$("name").value.trim();
-  if(!slug(name)){$("err").textContent="Please enter the guest's name.";$("name").focus();return}
+  const org=$("org").value.trim(),pos=$("pos").value.trim(),kind=$("kind").value;
+  const name=mode==="rep"?[org,pos].filter(Boolean).join(" – "):$("name").value.trim();
+  if(mode==="rep"){if(!org){$("err").textContent="Please enter the name of the "+kind+".";$("org").focus();return}
+    if(!pos){$("err").textContent=kind==="church"?"Please enter the position.":"Please enter the ward.";$("pos").focus();return}}
+  else if(!slug(name)){$("err").textContent="Please enter the guest's name.";$("name").focus();return}
   $("err").textContent="";$("add").disabled=true;
-  try{await addDoc({name,phone:intl($("phone").value),side:$("side").value});$("name").value="";$("phone").value="";$("name").focus()}
+  try{await addDoc({name,phone:intl($("phone").value),side:$("side").value,org,pos,kind});$("name").value="";$("org").value="";$("pos").value="";$("phone").value="";$("name").focus()}
   catch(x){$("err").textContent="Could not save: "+x.code}
   $("add").disabled=false});
 const sideOf=s=>{s=(s||"").trim().toLowerCase();return /^(g|groom|pastor|mwiinde|son|lushomo)/.test(s)?"Pastor O. Mwiinde":/^(b|bride|mr|mumba|daughter|edna)/.test(s)?"Mr. E. Mumba":""};
@@ -203,26 +214,34 @@ $("bf").addEventListener("submit",async e=>{e.preventDefault();$("berr").textCon
     const cells=(l.includes("\t")?l.split("\t"):l.split(/,(?=(?:[^"]*"[^"]*")*[^"]*$)/)).map(c=>c.trim().replace(/^"|"$/g,"").replace(/""/g,'"'));
     if(i===0&&/^(guest\s*)?names?$/i.test(cells[0]))return;
     if(!slug(cells[0]||"")){skipped++;return}
-    list.push({name:cells[0],phone:intl(cells[1]||""),side:sideOf(cells[2])})});
-  if(!list.length){$("berr").textContent="No guests found. Put one name per line.";return}
+    if(mode==="rep"){const o=cells[0]||"",p=(cells[1]||"").trim();if(!o||!p){skipped++;return}list.push({name:o+" – "+p,org:o,pos:p,kind:/hosp|clinic|ward/i.test(o+" "+p)?"hospital":"church",phone:intl(cells[2]||""),side:""})}
+    else list.push({name:cells[0],phone:intl(cells[1]||""),side:sideOf(cells[2])})});
+  if(!list.length){$("berr").textContent=mode==="rep"?"No representatives found. Put one per line: church or hospital name, then position or ward.":"No guests found. Put one name per line.";return}
   $("addbulk").disabled=true;
   try{for(let i=0;i<list.length;i+=400){const b=F.writeBatch(db);
-      list.slice(i,i+400).forEach((g,k)=>b.set(F.doc(F.collection(db,"guests")),{name:g.name,phone:g.phone,side:mode==="couple"?"":g.side,style:mode,createdAt:Date.now()+i+k}));await b.commit()}
+      list.slice(i,i+400).forEach((g,k)=>b.set(F.doc(F.collection(db,"guests")),docOf(g,Date.now()+i+k)));await b.commit()}
     $("bulk").value="";$("bok").textContent=`Added ${list.length} guest${list.length>1?"s":""}${skipped?` (${skipped} skipped)`:""}.`}
   catch(x){$("berr").textContent="Could not save: "+x.code}
   $("addbulk").disabled=false});
 $("allPdf").onclick=()=>all("pdf");$("zipPdf").onclick=()=>all("zippdf");$("zipPng").onclick=()=>all("zippng");
+function repLabels(){const h=$("kind").value==="hospital";
+  $("orgLbl").firstChild.textContent=h?"Name of hospital":"Name of church";$("orgHelp").textContent=h?"e.g. Monze Mission Hospital":"e.g. Monze SDA Church";
+  $("posLbl").firstChild.textContent=h?"Ward":"Position";$("posHelp").textContent=h?"e.g. Maternity Ward, Ward 3":"e.g. Elder, Youth Leader, Deaconess"}
+$("kind").onchange=repLabels;
 function setMode(m){mode=m;sel.clear();
-  $("tabParents").setAttribute("aria-selected",String(m==="parents"));$("tabCouple").setAttribute("aria-selected",String(m==="couple"));
-  $("sideLbl").hidden=m==="couple";
-  $("modeNote").textContent=m==="couple"?"Couple's invitation: starts with \"Together with their families\" and is signed by Lushomo and Edna. Guests added here get this card.":"Parents' invitation: starts with Pastor O. Mwiinde and Mr. E. Mumba inviting the guest. Guests added here get this card.";
-  $("listTitle").firstChild.textContent=m==="couple"?"Couple's guests ":"Parents' guests ";
+  $("tabParents").setAttribute("aria-selected",String(m==="parents"));$("tabCouple").setAttribute("aria-selected",String(m==="couple"));$("tabRep").setAttribute("aria-selected",String(m==="rep"));
+  $("sideLbl").hidden=m!=="parents";$("repFields").hidden=m!=="rep";$("nameLbl").hidden=m==="rep";repLabels();
+  $("bulkHelp").textContent=m==="rep"?"Church or hospital name, position or ward, WhatsApp number (optional). Paste straight from Excel or Google Sheets.":"Name, WhatsApp number (optional), invited by (optional: groom or bride). Paste straight from Excel or Google Sheets.";
+  $("bulk").placeholder=m==="rep"?"Monze SDA Church, Elder, 0977123456\nMonze Mission Hospital, Maternity Ward":"Mr & Mrs Banda, 0977123456, groom\nDr. Phiri, 0966555111, bride\nAunt Grace";
+  $("modeNote").textContent=m==="rep"?"Representatives invitation: headed \"Representatives\" with the church name and position, or the hospital and ward. Admits one guest, no gift line.":m==="couple"?"Couple's invitation: starts with \"Together with their families\" and is signed by Lushomo and Edna. Guests added here get this card.":"Parents' invitation: starts with Pastor O. Mwiinde and Mr. E. Mumba inviting the guest. Guests added here get this card.";
+  $("listTitle").firstChild.textContent=m==="rep"?"Representatives ":m==="couple"?"Couple's guests ":"Parents' guests ";
+  $("add").textContent=m==="rep"?"Add representatives":"Add guest";
   render()}
-$("tabParents").onclick=()=>setMode("parents");$("tabCouple").onclick=()=>setMode("couple");
+$("tabParents").onclick=()=>setMode("parents");$("tabCouple").onclick=()=>setMode("couple");$("tabRep").onclick=()=>setMode("rep");
 $("selAll").onchange=e=>{sel.clear();if(e.target.checked)view().forEach(g=>sel.add(g.id));render()};
 $("csv").onclick=()=>{const q=s=>'"'+String(s).replace(/"/g,'""')+'"';
-  const rows=[["Name","Phone","Card","Invited by","Link"],...view().map(g=>[g.name,g.phone,styleOf(g)==="couple"?"Couple's invitation":"Parents' invitation",styleOf(g)==="couple"?"":(g.side||"Both families"),linkFor(g)])];
-  offer("﻿"+rows.map(r=>r.map(q).join(",")).join("\r\n"),(mode==="couple"?"couple":"parents")+"-invited-guests.csv")};
+  const rows=[["Name","Phone","Card","Invited by / church or hospital","Link"],...view().map(g=>[g.name,g.phone,({couple:"Couple's invitation",rep:"Representatives invitation",parents:"Parents' invitation"})[styleOf(g)],styleOf(g)==="rep"?(g.org||"")+(g.pos?" – "+g.pos:""):styleOf(g)==="couple"?"":(g.side||"Both families"),linkFor(g)])];
+  offer("﻿"+rows.map(r=>r.map(q).join(",")).join("\r\n"),({parents:"parents",couple:"couple",rep:"representatives"})[mode]+"-invited-guests.csv")};
 
 $("login").addEventListener("submit",async e=>{e.preventDefault();$("lerr").textContent="";$("go").disabled=true;
   try{await A.signInWithEmailAndPassword(auth,$("em").value.trim(),$("pw").value)}

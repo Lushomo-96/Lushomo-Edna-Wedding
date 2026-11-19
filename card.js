@@ -2,7 +2,9 @@
 const PHOTO="assets/couple.jpg";
 const slug=s=>s.trim().toLowerCase().replace(/&/g," and ").replace(/[^\p{L}\p{N}\s-]/gu,"").replace(/\s+/g,"-").replace(/-+/g,"-").replace(/^-|-$/g,"");
 /* ---------- Card drawing ---------- */
-const GIFT="K500",ADMITS="two";
+const GIFT="K300",ADMITS="two";
+/* Church / ward (hospital) representative cards: admits one guest, no gift line. Change here if needed. */
+const REP_ADMITS="one",REP_GIFT="";
 const CW=1080,CH=2060,GOLD="#e3c77d",INK="#f6f3ea";
 let photo=null,fontsReady=null;
 function ready(){
@@ -24,9 +26,16 @@ async function drawCard(g){
   ctx.strokeStyle=GOLD;ctx.lineWidth=4;ctx.strokeRect(34,34,CW-68,CH-68);
   ctx.globalAlpha=.4;ctx.lineWidth=2;ctx.strokeRect(54,54,CW-108,CH-108);ctx.globalAlpha=1;
   diamonds(ctx,96);diamonds(ctx,CH-96);
-  if(g&&g.name){const s=fit(ctx,"Dear "+g.name+",",'{} "Pinyon Script"',76,840);tx(ctx,"Dear "+g.name+",",200,s+'px "Pinyon Script"',GOLD)}
   const couple=g&&g.style==="couple";
-  tx(ctx,couple?"TOGETHER WITH THEIR FAMILIES":"WITH JOY",g&&g.name?276:226,'600 24px "Figtree"',GOLD,"7px");
+  const rep=g&&g.style==="rep";
+  if(rep){
+    tx(ctx,"Representatives",196,'84px "Pinyon Script"',GOLD);
+    if(g.org){const s=fit(ctx,g.org,'{} "Gloock"',44,840);tx(ctx,g.org,258,s+'px "Gloock"',INK)}
+    if(g.pos){const s=fit(ctx,g.pos,'italic {} "Figtree"',32,840);tx(ctx,g.pos,306,'italic '+s+'px "Figtree"',INK)}
+  }else{
+    if(g&&g.name){const s=fit(ctx,"Dear "+g.name+",",'{} "Pinyon Script"',76,840);tx(ctx,"Dear "+g.name+",",200,s+'px "Pinyon Script"',GOLD)}
+    tx(ctx,couple?"TOGETHER WITH THEIR FAMILIES":"WITH JOY",g&&g.name?276:226,'600 24px "Figtree"',GOLD,"7px");
+  }
   if(couple){
     tx(ctx,"We joyfully invite you",450,'74px "Pinyon Script"',INK);
     tx(ctx,"to celebrate our wedding",546,'34px "Figtree"',INK);
@@ -50,8 +59,9 @@ async function drawCard(g){
   tx(ctx,"Sunday, 27 December 2026",1650,'46px "Gloock"',INK,"2px");
   tx(ctx,"MONZE · ZAMBIA",1696,'600 24px "Figtree"',GOLD,"7px");
   rule(ctx,1740);
-  tx(ctx,"ADMITS "+ADMITS.toUpperCase()+" GUESTS",1794,'600 24px "Figtree"',GOLD,"7px");
-  tx(ctx,"Gift: "+GIFT,1850,'46px "Gloock"',INK);
+  const adm=rep?REP_ADMITS:ADMITS,gift=rep?REP_GIFT:GIFT;
+  tx(ctx,"ADMITS "+adm.toUpperCase()+(adm==="one"?" GUEST":" GUESTS"),gift?1794:1822,'600 24px "Figtree"',GOLD,"7px");
+  if(gift)tx(ctx,"Gift: "+gift,1850,'46px "Gloock"',INK);
   ctx.globalAlpha=.85;
   tx(ctx,"Venue and programme times will be shared soon.",1912,'28px "Figtree"',INK);
   tx(ctx,"Kindly reply by 10 December 2026.",1950,'28px "Figtree"',INK);ctx.globalAlpha=1;

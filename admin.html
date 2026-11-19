@@ -66,7 +66,8 @@ li .meta{color:var(--muted);font-size:.85rem}
     <h2>Sign in</h2>
     <label for="em">Email<input id="em" type="email" autocomplete="username" required></label>
     <label for="pw">Password<input id="pw" type="password" autocomplete="current-password" required></label>
-    <div class="row"><button class="btn" type="submit" id="go">Sign in</button><span class="err" id="lerr" role="alert"></span></div>
+    <div class="row"><button class="btn" type="submit" id="go">Sign in</button><button class="btn alt" type="button" id="forgot">Forgot password?</button></div>
+    <span class="err" id="lerr" role="alert"></span><span class="ok" id="lok" role="status"></span>
     <p class="note">Only people who were given an account can sign in. Ask Lushomo or Edna if you need one.</p>
   </form>
 
@@ -247,6 +248,13 @@ $("login").addEventListener("submit",async e=>{e.preventDefault();$("lerr").text
   try{await A.signInWithEmailAndPassword(auth,$("em").value.trim(),$("pw").value)}
   catch(x){$("lerr").textContent=/invalid|wrong|user-not-found|credential/.test(x.code)?"Email or password is not correct.":x.code==="auth/too-many-requests"?"Too many tries. Wait a few minutes.":"Could not sign in ("+x.code+")."}
   $("go").disabled=false});
+$("forgot").onclick=async()=>{$("lerr").textContent=$("lok").textContent="";
+  const em=$("em").value.trim();
+  if(!em){$("lerr").textContent="Type your email above first, then press Forgot password.";$("em").focus();return}
+  $("forgot").disabled=true;
+  try{await A.sendPasswordResetEmail(auth,em);$("lok").textContent="If that email has an account, a reset link is on its way. Check your inbox and spam folder."}
+  catch(x){$("lerr").textContent=x.code==="auth/invalid-email"?"That email address does not look right.":x.code==="auth/too-many-requests"?"Too many tries. Wait a few minutes.":"Could not send the email ("+x.code+")."}
+  $("forgot").disabled=false};
 $("out").onclick=()=>A.signOut(auth);
 setMode("parents");
 A.onAuthStateChanged(auth,u=>{
